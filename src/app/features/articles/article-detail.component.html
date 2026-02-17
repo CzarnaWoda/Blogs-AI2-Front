@@ -1,0 +1,107 @@
+<div class="container">
+  @if (article(); as article) {
+    <article class="article" [class.disabled]="article.disabled" @fadeInUp>
+      @if (article.disabled) {
+        <div class="disabled-banner">
+          <lucide-icon [img]="AlertCircleIcon" [size]="20"></lucide-icon>
+          Ten artykuł został wyłączony przez administratora
+        </div>
+      }
+      <div class="article-header">
+        <h1>{{ article.title }}</h1>
+
+        <div class="article-meta-row">
+          <div class="meta-info">
+            <span class="meta-badge author" (click)="navigateToProfile(article.authorName)">
+              <lucide-icon [img]="UserIcon" [size]="16" class="badge-icon"></lucide-icon>
+              {{ article.authorName }}
+            </span>
+            <span class="meta-badge date">
+              <lucide-icon [img]="CalendarIcon" [size]="16" class="badge-icon"></lucide-icon>
+              {{ formatDate(article.createdAt) }}
+            </span>
+          </div>
+
+          <div class="article-stats">
+            <span class="stat-badge views">
+              <lucide-icon [img]="EyeIcon" [size]="18" class="stat-icon"></lucide-icon>
+              {{ article.views }}
+            </span>
+            <button (click)="likeArticle()" class="stat-badge likes interactive" type="button">
+              <lucide-icon [img]="HeartIcon" [size]="18" class="stat-icon"></lucide-icon>
+              {{ article.likes }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      @if (canEditArticle() || authService.hasRole(UserRole.ADMIN)) {
+        <div class="article-admin-actions">
+          @if (canEditArticle()) {
+            <button (click)="editArticle()" class="btn btn-secondary" type="button">
+              <lucide-icon [img]="EditIcon" [size]="16"></lucide-icon>
+              {{ i18n.t('articles.edit') }}
+            </button>
+          }
+          @if (authService.hasRole(UserRole.ADMIN)) {
+            <button (click)="toggleDisableArticle()" class="btn btn-warning" type="button">
+              <lucide-icon [img]="article.disabled ? CheckIcon : BanIcon" [size]="16"></lucide-icon>
+              {{ article.disabled ? i18n.t('articles.enable') : i18n.t('articles.disable') }}
+            </button>
+          }
+        </div>
+      }
+
+      <div class="article-content" [innerHTML]="formatContent(article.content)"></div>
+    </article>
+
+    <section class="comments-section">
+      <h2>{{ i18n.t('articles.comments') }} ({{ comments().length }})</h2>
+
+      @if (authService.currentUser()) {
+        <div class="comment-form">
+          <textarea
+            [(ngModel)]="newComment"
+            [placeholder]="i18n.t('articles.commentPlaceholder')"
+            class="comment-input"
+            rows="3"
+          ></textarea>
+          <button (click)="postComment()" class="btn-post-comment" type="button">
+            <lucide-icon [img]="MessageCircleIcon" [size]="20" class="btn-icon-left"></lucide-icon>
+            <span>{{ i18n.t('articles.postComment') }}</span>
+          </button>
+        </div>
+      }
+
+      <div class="comments-list" [@commentsAnimation]="comments().length">
+        @for (comment of comments(); track comment.id) {
+          <div class="comment" [class.blocked]="comment.blocked">
+            <div class="comment-header">
+              <span class="comment-author" (click)="navigateToProfile(comment.userName)">
+                <lucide-icon [img]="UserIcon" [size]="16" class="author-icon"></lucide-icon>
+                {{ comment.userName }}
+              </span>
+              <span class="comment-date">
+                <lucide-icon [img]="CalendarIcon" [size]="14" class="date-icon"></lucide-icon>
+                {{ formatDate(comment.createdAt) }}
+              </span>
+            </div>
+            <p class="comment-text">{{ comment.value }}</p>
+            <div class="comment-footer">
+              <button (click)="likeComment(comment.id)" class="comment-like-btn" type="button">
+                <lucide-icon [img]="HeartIcon" [size]="16" class="like-icon"></lucide-icon>
+                {{ comment.likes }}
+              </button>
+              @if (canBlockComments()) {
+                <button (click)="toggleBlockComment(comment)" class="comment-block-btn" type="button">
+                  <lucide-icon [img]="comment.blocked ? CheckIcon : BanIcon" [size]="16" class="block-icon"></lucide-icon>
+                  {{ comment.blocked ? i18n.t('articles.unblock') : i18n.t('articles.block') }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+</div>
