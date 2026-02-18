@@ -209,7 +209,7 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/<your-username>/Blogs-AI2-Front.git
+git clone https://github.com/CzarnaWoda/Blogs-AI2-Front.git
 cd Blogs-AI2-Front
 ```
 
